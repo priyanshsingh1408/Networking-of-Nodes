@@ -1,0 +1,134 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+
+using namespace std;
+
+const int MAX_NODES = 13; // Total nodes in the graph
+
+class Graph {
+private:
+    int nodes;
+    vector<vector<int>> capacity;
+    vector<vector<int>> flow;
+
+public:
+    Graph(int n) : nodes(n) {
+        capacity.resize(nodes, vector<int>(nodes, 0));
+        flow.resize(nodes, vector<int>(nodes, 0));
+    }
+
+    void addEdge(int u, int v, int cap) {
+        capacity[u][v] = cap;
+    }
+
+    int fordFulkerson(int source, int sink) {
+        int maxFlow = 0;
+        vector<int> parent(nodes);
+
+        while (bfs(source, sink, parent)) {
+            int pathFlow = INT_MAX;
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                pathFlow = min(pathFlow, capacity[u][v] - flow[u][v]);
+            }
+
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                flow[u][v] += pathFlow;
+                flow[v][u] -= pathFlow;
+            }
+
+            maxFlow += pathFlow;
+        }
+
+        return maxFlow;
+    }
+
+private:
+    bool bfs(int source, int sink, vector<int>& parent) {
+        vector<bool> visited(nodes, false);
+        queue<int> q;
+        q.push(source);
+        visited[source] = true;
+        parent[source] = -1;
+
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+
+            for (int v = 0; v < nodes; v++) {
+                if (!visited[v] && capacity[u][v] > flow[u][v]) {
+                    q.push(v);
+                    parent[v] = u;
+                    visited[v] = true;
+                }
+            }
+        }
+
+        return visited[sink];
+    }
+};
+
+class CDN {
+private:
+    Graph network;
+    vector<int> clients;
+    vector<int> intermediates;
+
+public:
+    CDN() : network(MAX_NODES) {
+        clients = {1, 2, 3, 4}; // Clients: 1, 2, 3, 4
+        intermediates = {5, 6, 7, 8, 9, 10, 11, 12}; // Intermediates: 5-12
+
+        // Adding edges as per the provided graph
+        addEdges();
+    }
+
+    void addEdges() {
+        // Server (node 0) to intermediates
+        network.addEdge(0, 5, 10);
+        network.addEdge(0, 6, 8);
+        network.addEdge(0, 7, 23);
+        network.addEdge(0, 9, 18);
+
+        // Intermediates to intermediates
+        network.addEdge(5, 7, 11);
+        network.addEdge(5, 6, 14);
+        network.addEdge(5, 12, 4);
+        network.addEdge(7, 6, 20);
+        network.addEdge(7, 8, 19);
+        network.addEdge(7, 9, 15);
+        network.addEdge(9, 8, 7);
+        network.addEdge(9, 10, 16);
+        network.addEdge(6, 11, 5);
+        network.addEdge(6, 8, 14);
+        network.addEdge(6, 12, 13);
+        network.addEdge(8, 10, 7);
+        network.addEdge(8, 4, 5);
+        network.addEdge(8, 2, 12);
+        network.addEdge(11, 8, 9);
+        network.addEdge(11, 4, 14);
+        network.addEdge(11, 3, 8);
+        network.addEdge(11, 1, 7);
+        network.addEdge(12, 1, 8);
+        network.addEdge(12, 2, 10);
+        network.addEdge(10, 3, 12);
+        network.addEdge(10, 4, 5);
+    }
+
+    void printMaxFlowToClients() {
+        for (int client : clients) {
+            int maxFlow = network.fordFulkerson(0, client);
+            cout << "Maximum flow from server (0) to client " << client << ": " << maxFlow << endl;
+        }
+    }
+};
+
+int main() {
+    CDN cdn;
+    cdn.printMaxFlowToClients();
+
+    return 0;
+}
