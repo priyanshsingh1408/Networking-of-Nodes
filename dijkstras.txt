@@ -1,0 +1,93 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+
+using namespace std;
+typedef pair<int, int> Node;
+
+struct NodeComparator {
+    bool operator()(Node& n1, Node& n2) {
+        return n1.second > n2.second; // Compare based on the second element (distance)
+    }
+};
+
+// Using the custom comparator
+
+// Define the number of nodes in the graph
+#define N 9
+
+// Define a pair to store the node and its distance
+
+// Define a vector to store the adjacency list
+vector<pair<int, int>> adj[N];
+
+// Define a function to add an edge to the graph
+void addEdge(int u, int v, int w) {
+    adj[u].push_back(make_pair(v, w));
+    adj[v].push_back(make_pair(u, w));
+}
+
+// Define a function to find the shortest path from source to all other nodes
+void dijkstra(int src) {
+    // Create a priority queue to store the nodes and their distances
+    priority_queue<Node, vector<Node>, NodeComparator> pq;
+
+
+    // Create a vector to store the shortest distances
+    vector<int> dist(N, INT_MAX);
+
+    // Set the distance of the source node to 0
+    dist[src] = 0;
+
+    // Push the source node into the priority queue
+    pq.push(make_pair(src, 0));
+
+    // Loop until the priority queue is empty
+    while (!pq.empty()) {
+        // Get the node with the minimum distance
+        int u = pq.top().first;
+        pq.pop();
+
+        // Loop through all the adjacent nodes
+        for (auto it = adj[u].begin(); it != adj[u].end(); it++) {
+            int v = it->first;
+            int weight = it->second;
+
+            // If the distance to the adjacent node is shorter, update the distance
+            if (dist[v] > dist[u] + weight) {
+                dist[v] = dist[u] + weight;
+                pq.push(make_pair(v,dist[v]));
+            }
+        }
+    }
+
+    // Print the shortest distances from the source node
+    cout << "Shortest distances from source node " << src << ":\n";
+    for (int i = 0; i < N; i++) {
+        cout << "Node " << i << ": " << dist[i] << "\n";
+    }
+}
+
+int main() {
+    // Add edges to the graph
+     addEdge( 0, 1, 4); 
+    addEdge( 0, 7, 8); 
+    addEdge( 1, 2, 8); 
+    addEdge( 1, 7, 11); 
+    addEdge( 2, 3, 7); 
+    addEdge( 2, 8, 2); 
+    addEdge( 2, 5, 4); 
+    addEdge( 3, 4, 9); 
+    addEdge( 3, 5, 14); 
+    addEdge( 4, 5, 10); 
+    addEdge( 5, 6, 2); 
+    addEdge( 6, 7, 1); 
+    addEdge( 6, 8, 6); 
+    addEdge( 7, 8, 7); 
+
+    // Find the shortest path from node 0
+    dijkstra(0);
+
+    return 0;
+}
