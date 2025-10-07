@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Graph {
+    int V;                      // Number of vertices
+    vector<vector<int>> adj;    // Adjacency list
+    vector<int> disc;           // Discovery times of vertices
+    vector<int> low;            // Lowest discovery time reachable
+    vector<bool> inStack;       // Whether a vertex is in the stack
+    stack<int> st;              // Stack to store visited vertices
+    int timeCounter;            // Discovery time counter
+
+    void tarjanDFS(int u) {
+        // Initialize discovery time and low value
+        disc[u] = low[u] = ++timeCounter;
+        st.push(u);
+        inStack[u] = true;
+
+        // Go through all neighbors
+        for (int v : adj[u]) {
+            if (disc[v] == -1) {
+                // If v is not visited, recurse for it
+                tarjanDFS(v);
+                low[u] = min(low[u], low[v]);
+            } else if (inStack[v]) {
+                // Back edge case
+                low[u] = min(low[u], disc[v]);
+            }
+        }
+
+        // If u is the head node of an SCC
+        if (low[u] == disc[u]) {
+            cout << "SCC: ";
+            while (true) {
+                int w = st.top();
+                st.pop();
+                inStack[w] = false;
+                cout << w << " ";
+                if (w == u)
+                    break;
+            }
+            cout << "\n";
+        }
+    }
+
+public:
+    Graph(int V) {
+        this->V = V;
+        adj.resize(V);
+        disc.assign(V, -1);
+        low.assign(V, -1);
+        inStack.assign(V, false);
+        timeCounter = 0;
+    }
+
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+    }
+
+    void tarjanSCC() {
+        for (int i = 0; i < V; i++) {
+            if (disc[i] == -1)
+                tarjanDFS(i);
+        }
+    }
+};
+
+int main() {
+    Graph g(5);
+    g.addEdge(1, 0);
+    g.addEdge(0, 2);
+    g.addEdge(2, 1);
+    g.addEdge(0, 3);
+    g.addEdge(3, 4);
+
+    cout << "Strongly Connected Components:\n";
+    g.tarjanSCC();
+
+    return 0;
+}
