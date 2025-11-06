@@ -1,4 +1,4 @@
-#include bitsstdc++.h
+#include bits<stdc++.h>
 using namespace std;
 
 User function Template for C++
@@ -72,4 +72,5 @@ int main() {
     }
     cout  endl;
     return 0;
+
 }
